@@ -2,7 +2,7 @@
 import streamlit as st
 from google.cloud import speech, texttospeech
 from huggingface_hub import pipeline
-from moviepy.editorimport VideoFileClip, TextClip, CompositeVideoClip
+from moviepy.editor import VideoFileClip, TextClip, CompositeVideoClip
 from transformers import pipeline
 
 # Text from pre-processed audio (replace with your actual text)
