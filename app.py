@@ -1,76 +1,24 @@
-import speech_recognition as sr
+import streamlit as st
 from google.cloud import speech, texttospeech
-import openai
 from huggingface_hub import pipeline
 from moviepy.editor import VideoFileClip, TextClip, CompositeVideoClip
-///
 from transformers import pipeline
 
-# OpenAI code:
-response = openai.Completion.create(
-    engine="text-davinci-003",
-    prompt="Write a poem about a robot who dreams of becoming a human.",
-    max_tokens=100,
-    temperature=0.7,
-)
+# Text from pre-processed audio (replace with your actual text)
+text = "This is the transcribed text from your audio file."  # Modify this
 
-# Hugging Face equivalent:
+# Hugging Face equivalent (optional):
 nlp = pipeline("text-generation", model="gpt2")
 generated_text = nlp(
     prompt="Write a poem about a robot who dreams of becoming a human.",
     max_length=100,
     num_beams=4,
 )
-# # Set your OpenAI API key
-# openai.api_key= "api_key";
 
-# def generate_text(prompt, max_tokens=100, temperature=0.7):
-#     """Generates text using the OpenAI GPT-3 API.
-
-#     Args:
-#         prompt: The text prompt to generate text from.
-#         max_tokens: The maximum number of tokens to generate.
-#         temperature: The temperature parameter controls the randomness of the text generation.
-
-#     Returns:
-#         The generated text.
-#     """
-
-#     response = openai.Completion.create(
-#         engine="text-davinci-003",  # You can use other models as well
-#         prompt=prompt,
-#         max_tokens=max_tokens,
-#         temperature=temperature,
-#     )
-
-#     return response.choices[0].text
-
-# # Example usage:
-# prompt = "Write a poem about a robot who dreams of becoming a human."
-# generated_text = generate_text(prompt, max_tokens=200)
-# print(generated_text)
-///
-def speech_to_text(audio_file):
-    """Converts speech to text using Google Cloud Speech-to-Text."""
-    client = speech.SpeechClient()
-    with open(audio_file, 'rb') as audio_file:
-        content = audio_file.read()
-    audio = speech.RecognitionAudio(content=content)
-    config = speech.RecognitionConfig(   
-
-        encoding=speech.RecognitionConfig.AudioEncoding.LINEAR16,   
-
-        language_code="en-US",
-    )
-    response = client.recognize(config=config, audio=audio)
-    for result in response.results:
-        return result.alternatives[0].transcript   
-
-
-def generate_script(text):
+def generate_script(input_text):
     """Generates a script using a pre-trained NLP model."""
     model = pipeline("text-generation", model="gpt2")
-    script = model(text, max_length=500, num_beams=4)
+    script = model(input_text, max_length=500, num_beams=4)
     return script[0]["generated_text"]
 
 def create_video(script, audio_file=None):
@@ -80,14 +28,17 @@ def create_video(script, audio_file=None):
     for scene in script.split("\n"):
         text_clip = TextClip(scene, font="Arial", fontsize=30, color="white")
         video_clips.append(text_clip)
-    # Combine video clips and add background music
+
+    # Combine video clips and add background music (optional)
     final_clip = CompositeVideoClip(video_clips, size=(1280, 720))
     final_clip = final_clip.set_duration(10)  # Adjust duration as needed
+
     # Add background music (optional)
     if audio_file:
         background_music = VideoFileClip(audio_file)
         final_clip = final_clip.set_audio(background_music.audio)
-    # Save the video
+
+    # Save the video (consider temporary file for Streamlit)
     final_clip.write_videofile("output.mp4")
 
 def text_to_speech(text):
@@ -96,23 +47,43 @@ def text_to_speech(text):
     synthesis_input = texttospeech.SynthesisInput(text=text)
     voice = texttospeech.VoiceSelectionParams(   
 
-        name="en-US-Standard-C",
-        language_code="en-US",
+        name="en-US-Standard-C", language_code="en-US"
     )
-    audio_config = texttospeech.AudioConfig(
-        audio_encoding=texttospeech.AudioEncoding.MP3,
-    )
+    audio_config = texttospeech.AudioConfig(audio_encoding=texttospeech.AudioEncoding.MP3)
     response = client.synthesize_speech(
         input=synthesis_input,   
  voice=voice, audio_config=audio_config
     )
-    with open('output.mp3', 'wb') as out:
+    with open("output.mp3", "wb") as out:
         out.write(response.audio_content)   
-def main(audio_file):
-    text = speech_to_text(audio_file)
-    script = generate_script(text)
+
+
+
+# Streamlit App
+st.title("Text-to-Video with Script Generation")
+
+# User Input (consider audio upload from previous session)
+user_text = st.text_input("Enter text or provide previous audio transcript")
+
+if user_text:
+    # Generate script
+    script = generate_script(user_text)
+
+    # Generate video
     create_video(script)
+
+    # Text-to-Speech (optional)
     text_to_speech(script)
-    if __name__ == "__main__":
-    audio_file = "your_audio_file.wav"
-    main(audio_file)
+
+    # Display results in Streamlit
+    st.write("Generated Script:")
+    st.write(script)
+
+    st.write("Generated Video:")
+    st.video("output.mp4")  # Consider temporary video handling
+
+    # Optional: Download links for video and audio (securely)
+    # ...
+
+st.markdown(
+    """**Note:** This is a simplified
