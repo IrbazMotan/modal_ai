@@ -84,4 +84,4 @@ if user_text:
     # ...
 
 st.markdown(
-    """**Note:** This is a simplified
+    # """**Note:** This is a simplified
