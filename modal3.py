@@ -2,6 +2,12 @@ import streamlit as st
 from google.cloud import texttospeech
 import tempfile
 
+from google.colab import files
+uploaded = files.upload()  # Upload 'credentials.json'
+import os
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "credentials.json"
+
+
 # Function to convert text to speech using Google Cloud Text-to-Speech
 def text_to_speech(text):
     client = texttospeech.TextToSpeechClient()
