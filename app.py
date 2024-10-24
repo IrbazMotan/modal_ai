@@ -27,3 +27,14 @@ def generate_story(prompt):
 # Provide text or transcribed speech to generate a story
 story = generate_story("Once upon a time in a futuristic city...")
 print(story)
+
+from gtts import gTTS
+
+# Story text
+story_text = "Once upon a time in a futuristic city..."
+
+# Convert the text into speech
+tts = gTTS(story_text)
+
+# Save the speech to an audio file
+tts.save("story_narration.mp3")
