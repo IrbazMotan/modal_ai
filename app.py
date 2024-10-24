@@ -3,7 +3,53 @@ from google.cloud import speech, texttospeech
 import openai
 from huggingface_hub import pipeline
 from moviepy.editor import VideoFileClip, TextClip, CompositeVideoClip
+///
+from transformers import pipeline
 
+# OpenAI code:
+response = openai.Completion.create(
+    engine="text-davinci-003",
+    prompt="Write a poem about a robot who dreams of becoming a human.",
+    max_tokens=100,
+    temperature=0.7,
+)
+
+# Hugging Face equivalent:
+nlp = pipeline("text-generation", model="gpt2")
+generated_text = nlp(
+    prompt="Write a poem about a robot who dreams of becoming a human.",
+    max_length=100,
+    num_beams=4,
+)
+# # Set your OpenAI API key
+# openai.api_key= "api_key";
+
+# def generate_text(prompt, max_tokens=100, temperature=0.7):
+#     """Generates text using the OpenAI GPT-3 API.
+
+#     Args:
+#         prompt: The text prompt to generate text from.
+#         max_tokens: The maximum number of tokens to generate.
+#         temperature: The temperature parameter controls the randomness of the text generation.
+
+#     Returns:
+#         The generated text.
+#     """
+
+#     response = openai.Completion.create(
+#         engine="text-davinci-003",  # You can use other models as well
+#         prompt=prompt,
+#         max_tokens=max_tokens,
+#         temperature=temperature,
+#     )
+
+#     return response.choices[0].text
+
+# # Example usage:
+# prompt = "Write a poem about a robot who dreams of becoming a human."
+# generated_text = generate_text(prompt, max_tokens=200)
+# print(generated_text)
+///
 def speech_to_text(audio_file):
     """Converts speech to text using Google Cloud Speech-to-Text."""
     client = speech.SpeechClient()
