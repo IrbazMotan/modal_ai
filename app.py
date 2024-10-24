@@ -2,6 +2,7 @@
 import streamlit as st
 from google.cloud import speech, texttospeech
 print(google.cloud.__version__)
+print(google.cloud.__file__)
 from huggingface_hub import pipeline
 from moviepy.editor import VideoFileClip, TextClip, CompositeVideoClip
 from transformers import pipeline
