@@ -1,4 +1,4 @@
-export GOOGLE_APPLICATION_CREDENTIALS="/path/to/your/credentials.json"
+# export GOOGLE_APPLICATION_CREDENTIALS="/path/to/your/credentials.json"
 import streamlit as st
 from google.cloud import speech, texttospeech
 from huggingface_hub import pipeline
