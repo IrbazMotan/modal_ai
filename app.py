@@ -1,3 +1,4 @@
+export GOOGLE_APPLICATION_CREDENTIALS="/path/to/your/credentials.json"
 import streamlit as st
 from google.cloud import speech, texttospeech
 from huggingface_hub import pipeline
@@ -45,18 +46,15 @@ def text_to_speech(text):
     """Converts text to speech using Google Cloud Text-to-Speech."""
     client = texttospeech.TextToSpeechClient()
     synthesis_input = texttospeech.SynthesisInput(text=text)
-    voice = texttospeech.VoiceSelectionParams(   
-
+    voice = texttospeech.VoiceSelectionParams(
         name="en-US-Standard-C", language_code="en-US"
     )
     audio_config = texttospeech.AudioConfig(audio_encoding=texttospeech.AudioEncoding.MP3)
     response = client.synthesize_speech(
-        input=synthesis_input,   
- voice=voice, audio_config=audio_config
+        input=synthesis_input, voice=voice, audio_config=audio_config
     )
     with open("output.mp3", "wb") as out:
-        out.write(response.audio_content)   
-
+        out.write(response.audio_content)
 
 
 # Streamlit App
