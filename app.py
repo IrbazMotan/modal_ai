@@ -79,7 +79,14 @@ if user_text:
 
     st.write("Generated Video:")
     st.video("output.mp4")  # Consider temporary video handling
-
+def exec_func_with_error_handling(func):
+    try:
+        result = func()
+    except Exception as e:
+        # Handle the exception gracefully
+        print(f"Error executing function: {e}")
+        # You can add more specific error handling here, such as logging or raising a custom exception
+    return result
     # Optional: Download links for video and audio (securely)
     # ...
 
