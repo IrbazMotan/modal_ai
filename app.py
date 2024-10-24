@@ -1,6 +1,7 @@
 # export GOOGLE_APPLICATION_CREDENTIALS="/path/to/your/credentials.json"
 import streamlit as st
 from google.cloud import speech, texttospeech
+print(google.cloud.__version__)
 from huggingface_hub import pipeline
 from moviepy.editor import VideoFileClip, TextClip, CompositeVideoClip
 from transformers import pipeline
