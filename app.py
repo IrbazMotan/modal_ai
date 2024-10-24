@@ -1,40 +1,72 @@
-import whisper
+import speech_recognition as sr
+from google.cloud import speech, texttospeech
 import openai
+from huggingface_hub import pipeline
+from moviepy.editor import VideoFileClip, TextClip, CompositeVideoClip
 
-# Load pre-trained Whisper model
-model = whisper.load_model("base")
+def speech_to_text(audio_file):
+    """Converts speech to text using Google Cloud Speech-to-Text."""
+    client = speech.SpeechClient()
+    with open(audio_file, 'rb') as audio_file:
+        content = audio_file.read()
+    audio = speech.RecognitionAudio(content=content)
+    config = speech.RecognitionConfig(   
 
-# Transcribe audio file to text
-result = model.transcribe("path_to_audio_file.wav")
+        encoding=speech.RecognitionConfig.AudioEncoding.LINEAR16,   
 
-# Print the transcription
-print(result["text"])
-
-# import openai
-
-# Your OpenAI API key here
-openai.api_key = "your-api-key"
-
-# Function to generate story
-def generate_story(prompt):
-    response = openai.Completion.create(
-      engine="text-davinci-004",  # Use GPT-4 variant
-      prompt=prompt,
-      max_tokens=500
+        language_code="en-US",
     )
-    return response.choices[0].text.strip()
+    response = client.recognize(config=config, audio=audio)
+    for result in response.results:
+        return result.alternatives[0].transcript   
 
-# Provide text or transcribed speech to generate a story
-story = generate_story("Once upon a time in a futuristic city...")
-print(story)
 
-from gtts import gTTS
+def generate_script(text):
+    """Generates a script using a pre-trained NLP model."""
+    model = pipeline("text-generation", model="gpt2")
+    script = model(text, max_length=500, num_beams=4)
+    return script[0]["generated_text"]
 
-# Story text
-story_text = "Once upon a time in a futuristic city..."
+def create_video(script, audio_file=None):
+    """Creates a video from the script."""
+    # Create video clips for each scene or dialogue
+    video_clips = []
+    for scene in script.split("\n"):
+        text_clip = TextClip(scene, font="Arial", fontsize=30, color="white")
+        video_clips.append(text_clip)
+    # Combine video clips and add background music
+    final_clip = CompositeVideoClip(video_clips, size=(1280, 720))
+    final_clip = final_clip.set_duration(10)  # Adjust duration as needed
+    # Add background music (optional)
+    if audio_file:
+        background_music = VideoFileClip(audio_file)
+        final_clip = final_clip.set_audio(background_music.audio)
+    # Save the video
+    final_clip.write_videofile("output.mp4")
 
-# Convert the text into speech
-tts = gTTS(story_text)
+def text_to_speech(text):
+    """Converts text to speech using Google Cloud Text-to-Speech."""
+    client = texttospeech.TextToSpeechClient()
+    synthesis_input = texttospeech.SynthesisInput(text=text)
+    voice = texttospeech.VoiceSelectionParams(   
 
-# Save the speech to an audio file
-tts.save("story_narration.mp3")
+        name="en-US-Standard-C",
+        language_code="en-US",
+    )
+    audio_config = texttospeech.AudioConfig(
+        audio_encoding=texttospeech.AudioEncoding.MP3,
+    )
+    response = client.synthesize_speech(
+        input=synthesis_input,   
+ voice=voice, audio_config=audio_config
+    )
+    with open('output.mp3', 'wb') as out:
+        out.write(response.audio_content)   
+def main(audio_file):
+    text = speech_to_text(audio_file)
+    script = generate_script(text)
+    create_video(script)
+    text_to_speech(script)
+    if __name__ == "__main__":
+    audio_file = "your_audio_file.wav"
+    main(audio_file)
